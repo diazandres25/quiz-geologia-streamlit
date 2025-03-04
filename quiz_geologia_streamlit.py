@@ -91,7 +91,7 @@ if st.session_state.nombre_jugador and st.session_state.indice_pregunta < len(pr
         st.warning("⏳ ¡Tiempo agotado! Pasamos a la siguiente pregunta.")
         st.session_state.indice_pregunta += 1
         st.session_state.tiempo_inicio = time.time()
-        st.experimental_rerun()
+        st.rerun()
 
     # Botón de responder
     if st.button("Responder"):
