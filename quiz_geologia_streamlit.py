@@ -3,7 +3,7 @@ import random
 import time
 import pandas as pd
 
-# Configurar la página
+# Configurar la página con un diseño más profesional
 st.set_page_config(page_title="Quiz de Geología Estructural - ACGGP", page_icon="⛏️", layout="centered")
 
 # Base de datos de preguntas
@@ -30,23 +30,7 @@ preguntas = [
          "La proyección de un perfil de la geología subyacente.",
          "Un esquema de elucubración de las rocas.",
          "Un corte general que ignora las capas específicas."
-     ], "respuesta": 1},
-
-    {"pregunta": "¿Cómo se mide el buzamiento de una capa?",
-     "opciones": [
-         "A través de la distancia lateral que recorre.",
-         "Mediante el ángulo entre la horizontal y la capa.",
-         "A través de la proyección sobre un plano vertical.",
-         "Mediante el desplazamiento neto de los bloques adyacentes."
-     ], "respuesta": 1},
-
-    {"pregunta": "¿Cuál de los siguientes materiales se necesita para trabajar con fallas?",
-     "opciones": [
-         "Calculadora y colores.",
-         "Papel pulido y pluma de gel.",
-         "Regla en milímetros y compás.",
-         "Hojas de papel fotográfico y tinta especial."
-     ], "respuesta": 2}
+     ], "respuesta": 1}
 ]
 
 # Barajar preguntas al iniciar
@@ -57,24 +41,39 @@ if "puntaje" not in st.session_state:
     st.session_state.puntaje = 0
 if "indice_pregunta" not in st.session_state:
     st.session_state.indice_pregunta = 0
-if "tiempo_inicio" not in st.session_state:
-    st.session_state.tiempo_inicio = time.time()
 if "nombre_jugador" not in st.session_state:
     st.session_state.nombre_jugador = ""
 if "respuesta_mostrada" not in st.session_state:
     st.session_state.respuesta_mostrada = False
+if "tiempo_inicio" not in st.session_state:
+    st.session_state.tiempo_inicio = None
 
 # Preguntar nombre del jugador al inicio
+st.title("📡 Quiz de Geología Estructural - ACGGP")
+st.write("Pon a prueba tus conocimientos sobre geología estructural y la ACGGP.")
+
 if st.session_state.nombre_jugador == "":
-    st.session_state.nombre_jugador = st.text_input("Ingresa tu nombre para comenzar:")
+    st.session_state.nombre_jugador = st.text_input("✍️ Ingresa tu nombre para comenzar:")
 
 if st.session_state.nombre_jugador and st.session_state.indice_pregunta < len(preguntas):
     # Obtener la pregunta actual
     indice = st.session_state.indice_pregunta
     pregunta_actual = preguntas[indice]
 
+    # Iniciar temporizador
+    if st.session_state.tiempo_inicio is None:
+        st.session_state.tiempo_inicio = time.time()
+    tiempo_restante = max(0, 10 - (time.time() - st.session_state.tiempo_inicio))
+    st.progress(tiempo_restante / 10)
+
+    if tiempo_restante == 0:
+        st.warning("⏳ ¡Tiempo agotado! Pasamos a la siguiente pregunta.")
+        st.session_state.indice_pregunta += 1
+        st.session_state.tiempo_inicio = None
+        st.rerun()
+
     # Mostrar pregunta y opciones
-    st.subheader(f"🔹 Pregunta {indice + 1}")
+    st.subheader(f"🔹 Pregunta {indice + 1} de {len(preguntas)}")
     st.write(f"❓ {pregunta_actual['pregunta']}")
 
     respuesta_usuario = st.radio("Selecciona una opción:", pregunta_actual["opciones"], index=None)
@@ -90,14 +89,15 @@ if st.session_state.nombre_jugador and st.session_state.indice_pregunta < len(pr
             
             st.session_state.respuesta_mostrada = True
     
-    if st.session_state.respuesta_mostrada and st.button("Siguiente pregunta"):
+    if st.session_state.respuesta_mostrada and st.button("Siguiente pregunta ➡️"):
         st.session_state.indice_pregunta += 1
         st.session_state.respuesta_mostrada = False
+        st.session_state.tiempo_inicio = None
         st.rerun()
 
 # Mostrar resultado final
 elif st.session_state.indice_pregunta >= len(preguntas):
-    st.subheader(f"🎉 ¡Juego terminado! Tu puntaje final es {st.session_state.puntaje}/{len(preguntas)}")
+    st.subheader(f"🎉 ¡Juego terminado, {st.session_state.nombre_jugador}! Tu puntaje final es {st.session_state.puntaje}/{len(preguntas)}")
     
     # Guardar puntaje en archivo CSV
     historial_file = "historial_puntajes.csv"
@@ -121,5 +121,5 @@ elif st.session_state.indice_pregunta >= len(preguntas):
         st.session_state.puntaje = 0
         st.session_state.indice_pregunta = 0
         st.session_state.respuesta_mostrada = False
-        st.session_state.tiempo_inicio = time.time()
+        st.session_state.tiempo_inicio = None
         st.rerun()
