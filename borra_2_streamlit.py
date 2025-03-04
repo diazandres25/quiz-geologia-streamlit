@@ -4,7 +4,10 @@ import time
 import pandas as pd
 
 # Configurar la página
-st.set_page_config(page_title="Quiz de Geología", page_icon="🌍", layout="centered")
+st.set_page_config(page_title="Quiz de Geología - ACGGP", page_icon="🌍", layout="wide")
+
+# Cargar imagen de ACGGP
+st.image("https://www.acggp.org/images/logo.png", width=200)
 
 # Categorías de preguntas
 preguntas_por_categoria = {
@@ -23,6 +26,8 @@ preguntas_por_categoria = {
 }
 
 # Inicializar variables de estado
+if "historial_puntajes" not in st.session_state:
+    st.session_state.historial_puntajes = {}
 if "nombre_jugador" not in st.session_state:
     st.session_state.nombre_jugador = ""
 if "categoria_seleccionada" not in st.session_state:
@@ -37,8 +42,8 @@ if "respuesta_mostrada" not in st.session_state:
     st.session_state.respuesta_mostrada = False
 
 # Solicitar el nombre del jugador
-st.title("🌍 Quiz de Geología")
-st.write("Pon a prueba tus conocimientos en geología.")
+st.title("🌍 Quiz de Geología - ACGGP")
+st.write("Pon a prueba tus conocimientos en geología con este quiz de la ACGGP.")
 
 if st.session_state.nombre_jugador == "":
     st.session_state.nombre_jugador = st.text_input("✍️ Ingresa tu nombre para comenzar:")
@@ -81,25 +86,18 @@ if st.session_state.categoria_seleccionada:
     
     else:
         st.subheader(f"🎉 ¡Juego terminado, {st.session_state.nombre_jugador}! Tu puntaje final es {st.session_state.puntaje}/{len(st.session_state.preguntas)}")
+        st.session_state.historial_puntajes[st.session_state.nombre_jugador] = st.session_state.puntaje
+
+        # Mostrar ranking de los mejores 5 jugadores
+        st.subheader("🏆 Ranking de jugadores")
+        ranking = sorted(st.session_state.historial_puntajes.items(), key=lambda x: x[1], reverse=True)[:5]
+        for i, (jugador, puntaje) in enumerate(ranking, start=1):
+            st.write(f"{i}. {jugador}: {puntaje} puntos")
+
         if st.button("🔄 Volver a jugar"):
             st.session_state.categoria_seleccionada = ""
             st.session_state.indice_pregunta = 0
             st.session_state.puntaje = 0
             st.session_state.respuesta_mostrada = False
             st.rerun()
-           # Guardar puntaje en archivo CSV
-    historial_file = "historial_puntajes.csv"
-    nuevo_puntaje = pd.DataFrame([[st.session_state.nombre_jugador, st.session_state.puntaje]], columns=["Jugador", "Puntaje"])
-    
-    try:
-        historial = pd.read_csv(historial_file)
-        historial = pd.concat([historial, nuevo_puntaje], ignore_index=True)
-    except FileNotFoundError:
-        historial = nuevo_puntaje
 
-    historial.to_csv(historial_file, index=False, encoding='utf-8')
-
-    # Mostrar ranking
-    st.subheader("🏆 Ranking de jugadores")
-    historial = historial.sort_values(by="Puntaje", ascending=False).head(5)
-    st.dataframe(historial)
