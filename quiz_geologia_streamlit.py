@@ -4,7 +4,7 @@ import time
 import pandas as pd
 
 # Configurar la página
-st.set_page_config(page_title="Quiz de Geología Estructural - ACGGP", page_icon="\u26cf\ufe0f", layout="centered")
+st.set_page_config(page_title="Quiz de Geología Estructural - ACGGP", page_icon="", layout="centered")
 
 # Base de datos de preguntas
 preguntas = [
@@ -69,7 +69,7 @@ if "nombre_jugador" not in st.session_state:
 
 # Preguntar nombre del jugador al inicio
 if st.session_state.nombre_jugador == "":
-    st.session_state.nombre_jugador = st.text_input("\ud83d\udc64 Ingresa tu nombre para comenzar:")
+    st.session_state.nombre_jugador = st.text_input(" Ingresa tu nombre para comenzar:")
 
 if st.session_state.nombre_jugador and st.session_state.indice_pregunta < len(preguntas):
     # Obtener la pregunta actual
@@ -77,7 +77,7 @@ if st.session_state.nombre_jugador and st.session_state.indice_pregunta < len(pr
     pregunta_actual = preguntas[indice]
 
     # Mostrar pregunta y opciones
-    st.subheader(f"\ud83d\udd39 {pregunta_actual['categoria']} - Pregunta {indice + 1}")
+    st.subheader(f"{pregunta_actual['categoria']} - Pregunta {indice + 1}")
     st.write(f"❓ {pregunta_actual['pregunta']}")
 
     respuesta_usuario = st.radio("Selecciona una opción:", pregunta_actual["opciones"], index=None)
@@ -105,7 +105,7 @@ if st.session_state.nombre_jugador and st.session_state.indice_pregunta < len(pr
             # Siguiente pregunta
             st.session_state.indice_pregunta += 1
             st.session_state.tiempo_inicio = time.time()
-            st.experimental_rerun()
+            st.rerun()
 
 # Mostrar resultado final
 elif st.session_state.indice_pregunta >= len(preguntas):
