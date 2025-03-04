@@ -63,8 +63,8 @@ if st.session_state.nombre_jugador and st.session_state.indice_pregunta < len(pr
     # Iniciar temporizador
     if st.session_state.tiempo_inicio is None:
         st.session_state.tiempo_inicio = time.time()
-    tiempo_restante = max(0, 10 - (time.time() - st.session_state.tiempo_inicio))
-    st.progress(tiempo_restante / 10)
+    tiempo_restante = max(0, 0.10 - (time.time() - st.session_state.tiempo_inicio))
+    st.progress(tiempo_restante / 0.10)
 
     if tiempo_restante == 0:
         st.warning("⏳ ¡Tiempo agotado! Pasamos a la siguiente pregunta.")
