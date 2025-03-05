@@ -110,3 +110,4 @@ if st.session_state.categoria_seleccionada:
     else:
         st.subheader(f"🎉 ¡Juego terminado, {st.session_state.nombre_jugador}! Tu puntaje final es {st.session_state.puntaje}/{len(st.session_state.preguntas)}")
         st.session_state.historial_puntajes[st.session_state.nombre_jugador] = st.session_state.puntaje
+
