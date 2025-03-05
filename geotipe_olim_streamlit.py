@@ -106,4 +106,3 @@ with open(CSV_FILE, mode="r", newline="") as file:
     reader = csv.reader(file)
     datos = list(reader)
 st.table(datos)
-
