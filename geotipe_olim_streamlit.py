@@ -1,8 +1,16 @@
 import streamlit as st
 import random
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 # Configurar la página con un diseño llamativo
 st.set_page_config(page_title="Geolimpiadas - ACGGP", page_icon="🌍", layout="wide")
+
+# Configuración de Google Sheets
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+creds = ServiceAccountCredentials.from_json_keyfile_name("credenciales.json", scope)
+client = gspread.authorize(creds)
+sheet = client.open("Geolimpiadas_Puntajes").sheet1
 
 # Estilos mejorados
 st.markdown(
@@ -44,67 +52,43 @@ preguntas_por_categoria = {
     ],
 }
 
-# Estado inicial para múltiples jugadores
-if "jugadores" not in st.session_state:
-    st.session_state.jugadores = []
-if "jugador_actual" not in st.session_state:
-    st.session_state.jugador_actual = 0
-if "categoria_seleccionada" not in st.session_state:
-    st.session_state.categoria_seleccionada = ""
-if "preguntas" not in st.session_state:
-    st.session_state.preguntas = []
-if "indice_pregunta" not in st.session_state:
-    st.session_state.indice_pregunta = 0
-if "respuesta_mostrada" not in st.session_state:
-    st.session_state.respuesta_mostrada = False
-
-# Registrar jugadores
-if len(st.session_state.jugadores) < 5:
-    nombre = st.text_input(f"✍️ Ingresa el nombre del jugador {len(st.session_state.jugadores) + 1}:")
-    if nombre and st.button("Añadir jugador"):
-        st.session_state.jugadores.append({"nombre": nombre, "puntaje": 0})
-        st.rerun()
+# Registro del jugador individual
+nombre = st.text_input("✍️ Ingresa tu nombre:")
+if nombre and st.button("Registrarse"):
+    sheet.append_row([nombre, 0])
+    st.success(f"Jugador {nombre} registrado. Puedes comenzar el quiz.")
 
 # Seleccionar categoría
-if len(st.session_state.jugadores) == 5 and not st.session_state.categoria_seleccionada:
-    st.write("### 🔎 Selecciona una categoría de preguntas:")
-    col1, col2, col3 = st.columns(3)
-    if col1.button("🌎 General"):
-        st.session_state.categoria_seleccionada = "General"
-        st.session_state.preguntas = random.sample(preguntas_por_categoria["General"], len(preguntas_por_categoria["General"]))
-    if col2.button("🏗️ Estructural"):
-        st.session_state.categoria_seleccionada = "Estructural"
-        st.session_state.preguntas = random.sample(preguntas_por_categoria["Estructural"], len(preguntas_por_categoria["Estructural"]))
-    if col3.button("⛏️ Sedimentología"):
-        st.session_state.categoria_seleccionada = "Sedimentología"
-        st.session_state.preguntas = random.sample(preguntas_por_categoria["Sedimentología"], len(preguntas_por_categoria["Sedimentología"]))
+categoria_seleccionada = st.selectbox("🔎 Selecciona una categoría de preguntas:", list(preguntas_por_categoria.keys()))
 
 # Mostrar preguntas
-if st.session_state.categoria_seleccionada:
-    jugador = st.session_state.jugadores[st.session_state.jugador_actual]
-    if st.session_state.indice_pregunta < len(st.session_state.preguntas):
-        pregunta_actual = st.session_state.preguntas[st.session_state.indice_pregunta]
-        st.subheader(f"🎯 Turno de {jugador['nombre']}")
-        st.subheader(f"❓ Pregunta {st.session_state.indice_pregunta + 1} de {len(st.session_state.preguntas)}")
-        st.write(pregunta_actual["pregunta"])
-        respuesta_usuario = st.radio("Selecciona una opción:", pregunta_actual["opciones"], index=None)
+def iniciar_quiz(nombre):
+    preguntas = random.sample(preguntas_por_categoria[categoria_seleccionada], len(preguntas_por_categoria[categoria_seleccionada]))
+    puntaje = 0
+    for i, pregunta in enumerate(preguntas):
+        st.subheader(f"❓ Pregunta {i + 1} de {len(preguntas)}")
+        st.write(pregunta["pregunta"])
+        respuesta_usuario = st.radio("Selecciona una opción:", pregunta["opciones"], index=None)
 
-        if st.button("Responder") and not st.session_state.respuesta_mostrada:
+        if st.button("Responder", key=f"resp_{i}"):
             if respuesta_usuario is not None:
-                if pregunta_actual["opciones"].index(respuesta_usuario) == pregunta_actual["respuesta"]:
+                if pregunta["opciones"].index(respuesta_usuario) == pregunta["respuesta"]:
                     st.success("✅ ¡Correcto!")
-                    jugador["puntaje"] += 1
+                    puntaje += 1
                 else:
-                    st.error(f"❌ Incorrecto. La respuesta correcta era: {pregunta_actual['opciones'][pregunta_actual['respuesta']]}")
-                st.session_state.respuesta_mostrada = True
+                    st.error(f"❌ Incorrecto. La respuesta correcta era: {pregunta['opciones'][pregunta['respuesta']]}")
 
-        if st.session_state.respuesta_mostrada and st.button("Siguiente jugador ➡️"):
-            st.session_state.jugador_actual = (st.session_state.jugador_actual + 1) % 5
-            if st.session_state.jugador_actual == 0:
-                st.session_state.indice_pregunta += 1
-            st.session_state.respuesta_mostrada = False
-            st.rerun()
-    else:
-        st.subheader("🎉 ¡Juego terminado!")
-        for j in st.session_state.jugadores:
-            st.write(f"{j['nombre']}: {j['puntaje']} puntos")
+    # Guardar puntaje en Google Sheets
+    cell = sheet.find(nombre)
+    sheet.update_cell(cell.row, 2, puntaje)
+    st.subheader(f"🎉 Has terminado el quiz, {nombre}!")
+    st.write(f"Tu puntaje final: {puntaje}")
+
+if st.button("Comenzar Quiz") and nombre:
+    iniciar_quiz(nombre)
+
+# Mostrar clasificación
+datos = sheet.get_all_values()
+st.subheader("🏆 Clasificación Total")
+st.table(datos)
+
