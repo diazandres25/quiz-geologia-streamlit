@@ -34,11 +34,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Mostrar logo de ACGGP con diseño mejorado
-col1, col2, col3 = st.columns([1, 3, 1])
-with col2:
-    st.image("/mnt/data/image.png", width=400)
-
 st.markdown("<div class='title'>🌍 Geolimpiadas - ACGGP</div>", unsafe_allow_html=True)
 st.markdown("<div class='subtext'>Pon a prueba tus conocimientos en geología con este quiz.</div>", unsafe_allow_html=True)
 
