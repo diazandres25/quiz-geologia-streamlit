@@ -1,16 +1,19 @@
 import streamlit as st
 import random
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+import csv
+import os
 
 # Configurar la página con un diseño llamativo
 st.set_page_config(page_title="Geolimpiadas - ACGGP", page_icon="🌍", layout="wide")
 
-# Configuración de Google Sheets
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("credenciales.json", scope)
-client = gspread.authorize(creds)
-sheet = client.open("Geolimpiadas_Puntajes").sheet1
+# Archivo CSV para almacenar los puntajes
+CSV_FILE = "puntajes.csv"
+
+# Crear archivo si no existe
+if not os.path.exists(CSV_FILE):
+    with open(CSV_FILE, mode="w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(["Nombre", "Puntaje"])
 
 # Estilos mejorados
 st.markdown(
@@ -55,7 +58,9 @@ preguntas_por_categoria = {
 # Registro del jugador individual
 nombre = st.text_input("✍️ Ingresa tu nombre:")
 if nombre and st.button("Registrarse"):
-    sheet.append_row([nombre, 0])
+    with open(CSV_FILE, mode="a", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow([nombre, 0])
     st.success(f"Jugador {nombre} registrado. Puedes comenzar el quiz.")
 
 # Seleccionar categoría
@@ -78,9 +83,17 @@ def iniciar_quiz(nombre):
                 else:
                     st.error(f"❌ Incorrecto. La respuesta correcta era: {pregunta['opciones'][pregunta['respuesta']]}")
 
-    # Guardar puntaje en Google Sheets
-    cell = sheet.find(nombre)
-    sheet.update_cell(cell.row, 2, puntaje)
+    # Guardar puntaje en CSV
+    with open(CSV_FILE, mode="r", newline="") as file:
+        reader = list(csv.reader(file))
+        for row in reader:
+            if row[0] == nombre:
+                row[1] = str(puntaje)
+                break
+    with open(CSV_FILE, mode="w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerows(reader)
+    
     st.subheader(f"🎉 Has terminado el quiz, {nombre}!")
     st.write(f"Tu puntaje final: {puntaje}")
 
@@ -88,6 +101,9 @@ if st.button("Comenzar Quiz") and nombre:
     iniciar_quiz(nombre)
 
 # Mostrar clasificación
-datos = sheet.get_all_values()
 st.subheader("🏆 Clasificación Total")
+with open(CSV_FILE, mode="r", newline="") as file:
+    reader = csv.reader(file)
+    datos = list(reader)
 st.table(datos)
+
