@@ -20,15 +20,6 @@ st.markdown(
             font-size: 20px;
             color: #34495e;
         }
-        .category-button {
-            font-size: 24px !important;
-            font-weight: bold;
-            padding: 20px;
-            width: 100%;
-        }
-        .container {
-            text-align: center;
-        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -53,58 +44,68 @@ preguntas_por_categoria = {
     ],
 }
 
-# Estado inicial
-if "nombre_jugador" not in st.session_state:
-    st.session_state.nombre_jugador = ""
+# Estado inicial para múltiples jugadores
+if "jugadores" not in st.session_state:
+    st.session_state.jugadores = []
+if "jugador_actual" not in st.session_state:
+    st.session_state.jugador_actual = 0
 if "categoria_seleccionada" not in st.session_state:
     st.session_state.categoria_seleccionada = ""
 if "preguntas" not in st.session_state:
     st.session_state.preguntas = []
 if "indice_pregunta" not in st.session_state:
     st.session_state.indice_pregunta = 0
-if "puntaje" not in st.session_state:
-    st.session_state.puntaje = 0
 if "respuesta_mostrada" not in st.session_state:
     st.session_state.respuesta_mostrada = False
 
-# Solicitar el nombre
-st.session_state.nombre_jugador = st.text_input("✍️ Ingresa tu nombre para comenzar:")
+# Registrar jugadores
+if len(st.session_state.jugadores) < 5:
+    nombre = st.text_input(f"✍️ Ingresa el nombre del jugador {len(st.session_state.jugadores) + 1}:")
+    if nombre and st.button("Añadir jugador"):
+        st.session_state.jugadores.append({"nombre": nombre, "puntaje": 0})
+        st.rerun()
 
-if st.session_state.nombre_jugador and not st.session_state.categoria_seleccionada:
+# Seleccionar categoría
+if len(st.session_state.jugadores) == 5 and not st.session_state.categoria_seleccionada:
     st.write("### 🔎 Selecciona una categoría de preguntas:")
     col1, col2, col3 = st.columns(3)
-    if col1.button("🌎 General", key="general"):
+    if col1.button("🌎 General"):
         st.session_state.categoria_seleccionada = "General"
         st.session_state.preguntas = random.sample(preguntas_por_categoria["General"], len(preguntas_por_categoria["General"]))
-    if col2.button("🏗️ Estructural", key="estructural"):
+    if col2.button("🏗️ Estructural"):
         st.session_state.categoria_seleccionada = "Estructural"
         st.session_state.preguntas = random.sample(preguntas_por_categoria["Estructural"], len(preguntas_por_categoria["Estructural"]))
-    if col3.button("⛏️ Sedimentología", key="sedimentologia"):
+    if col3.button("⛏️ Sedimentología"):
         st.session_state.categoria_seleccionada = "Sedimentología"
         st.session_state.preguntas = random.sample(preguntas_por_categoria["Sedimentología"], len(preguntas_por_categoria["Sedimentología"]))
 
 # Mostrar preguntas
 if st.session_state.categoria_seleccionada:
+    jugador = st.session_state.jugadores[st.session_state.jugador_actual]
     if st.session_state.indice_pregunta < len(st.session_state.preguntas):
         pregunta_actual = st.session_state.preguntas[st.session_state.indice_pregunta]
+        st.subheader(f"🎯 Turno de {jugador['nombre']}")
         st.subheader(f"❓ Pregunta {st.session_state.indice_pregunta + 1} de {len(st.session_state.preguntas)}")
         st.write(pregunta_actual["pregunta"])
         respuesta_usuario = st.radio("Selecciona una opción:", pregunta_actual["opciones"], index=None)
-        
+
         if st.button("Responder") and not st.session_state.respuesta_mostrada:
             if respuesta_usuario is not None:
                 if pregunta_actual["opciones"].index(respuesta_usuario) == pregunta_actual["respuesta"]:
                     st.success("✅ ¡Correcto!")
-                    st.session_state.puntaje += 1
+                    jugador["puntaje"] += 1
                 else:
                     st.error(f"❌ Incorrecto. La respuesta correcta era: {pregunta_actual['opciones'][pregunta_actual['respuesta']]}")
                 st.session_state.respuesta_mostrada = True
 
-        if st.session_state.respuesta_mostrada and st.button("Siguiente pregunta ➡️"):
-            st.session_state.indice_pregunta += 1
+        if st.session_state.respuesta_mostrada and st.button("Siguiente jugador ➡️"):
+            st.session_state.jugador_actual = (st.session_state.jugador_actual + 1) % 5
+            if st.session_state.jugador_actual == 0:
+                st.session_state.indice_pregunta += 1
             st.session_state.respuesta_mostrada = False
             st.rerun()
     else:
-        st.subheader(f"🎉 ¡Juego terminado, {st.session_state.nombre_jugador}! Tu puntaje final es {st.session_state.puntaje}/{len(st.session_state.preguntas)}")
-
+        st.subheader("🎉 ¡Juego terminado!")
+        for j in st.session_state.jugadores:
+            st.write(f"{j['nombre']}: {j['puntaje']} puntos")
 
