@@ -91,4 +91,3 @@ if st.button("Comenzar Quiz") and nombre:
 datos = sheet.get_all_values()
 st.subheader("🏆 Clasificación Total")
 st.table(datos)
-
