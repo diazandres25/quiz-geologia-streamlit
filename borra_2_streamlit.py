@@ -4,10 +4,10 @@ import time
 import pandas as pd
 
 # Configurar la página
-st.set_page_config(page_title="Quiz de Geología - ACGGP", page_icon="🌍", layout="wide")
+st.set_page_config(page_title="Geolimpiadas - ACGGP", page_icon="🌍", layout="wide")
 
 # Cargar imagen de ACGGP
-st.image("https://www.acggp.org/images/logo.png", width=200)
+st.image("https://www.acggp.org/images/logo.png", width=300)
 
 # Categorías de preguntas
 preguntas_por_categoria = {
@@ -42,7 +42,7 @@ if "respuesta_mostrada" not in st.session_state:
     st.session_state.respuesta_mostrada = False
 
 # Solicitar el nombre del jugador
-st.title("🌍 Quiz de Geología - ACGGP")
+st.title("🌍 Geolimpiadas - ACGGP")
 st.write("Pon a prueba tus conocimientos en geología con este quiz de la ACGGP.")
 
 if st.session_state.nombre_jugador == "":
@@ -51,13 +51,13 @@ if st.session_state.nombre_jugador == "":
 if st.session_state.nombre_jugador and st.session_state.categoria_seleccionada == "":
     st.write("Selecciona una categoría de preguntas:")
     col1, col2, col3 = st.columns(3)
-    if col1.button("🌎 General"):
+    if col1.button("🌎 **General**", key="general", help="Preguntas sobre geología general", use_container_width=True):
         st.session_state.categoria_seleccionada = "General"
         st.session_state.preguntas = random.sample(preguntas_por_categoria["General"], len(preguntas_por_categoria["General"]))
-    if col2.button("🏗️ Estructural"):
+    if col2.button("🏗️ **Estructural**", key="estructural", help="Preguntas sobre geología estructural", use_container_width=True):
         st.session_state.categoria_seleccionada = "Estructural"
         st.session_state.preguntas = random.sample(preguntas_por_categoria["Estructural"], len(preguntas_por_categoria["Estructural"]))
-    if col3.button("⛏️ Sedimentología"):
+    if col3.button("⛏️ **Sedimentología**", key="sedimentologia", help="Preguntas sobre sedimentología", use_container_width=True):
         st.session_state.categoria_seleccionada = "Sedimentología"
         st.session_state.preguntas = random.sample(preguntas_por_categoria["Sedimentología"], len(preguntas_por_categoria["Sedimentología"]))
 
@@ -100,4 +100,5 @@ if st.session_state.categoria_seleccionada:
             st.session_state.puntaje = 0
             st.session_state.respuesta_mostrada = False
             st.rerun()
+
 
