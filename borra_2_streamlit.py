@@ -4,10 +4,33 @@ import time
 import pandas as pd
 
 # Configurar la página
+title_html = """
+    <style>
+        .title {
+            text-align: center;
+            font-size: 50px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .subtext {
+            text-align: center;
+            font-size: 20px;
+            color: #34495e;
+        }
+        .category-button {
+            font-size: 24px !important;
+            font-weight: bold;
+            padding: 20px;
+            width: 100%;
+        }
+    </style>
+"""
 st.set_page_config(page_title="Geolimpiadas - ACGGP", page_icon="🌍", layout="wide")
+st.markdown(title_html, unsafe_allow_html=True)
 
-# Cargar imagen de ACGGP
-st.image("https://www.acggp.org/images/logo.png", width=300)
+# Mostrar imagen del logo ACGGP con fondo decorativo
+st.image("/mnt/data/image.png", width=500)
 
 # Categorías de preguntas
 preguntas_por_categoria = {
@@ -42,22 +65,23 @@ if "respuesta_mostrada" not in st.session_state:
     st.session_state.respuesta_mostrada = False
 
 # Solicitar el nombre del jugador
-st.title("🌍 Geolimpiadas - ACGGP")
-st.write("Pon a prueba tus conocimientos en geología con este quiz de la ACGGP.")
+st.markdown("<div class='title'>🌍 Geolimpiadas - ACGGP</div>", unsafe_allow_html=True)
+st.markdown("<div class='subtext'>Pon a prueba tus conocimientos en geología con este quiz de la ACGGP.</div>", unsafe_allow_html=True)
 
 if st.session_state.nombre_jugador == "":
     st.session_state.nombre_jugador = st.text_input("✍️ Ingresa tu nombre para comenzar:")
 
 if st.session_state.nombre_jugador and st.session_state.categoria_seleccionada == "":
-    st.write("Selecciona una categoría de preguntas:")
+    st.write("\n")
+    st.write("### 🔎 Selecciona una categoría de preguntas:")
     col1, col2, col3 = st.columns(3)
-    if col1.button("🌎 **General**", key="general", help="Preguntas sobre geología general", use_container_width=True):
+    if col1.button("🌎 General", key="general", help="Preguntas sobre geología general", use_container_width=True):
         st.session_state.categoria_seleccionada = "General"
         st.session_state.preguntas = random.sample(preguntas_por_categoria["General"], len(preguntas_por_categoria["General"]))
-    if col2.button("🏗️ **Estructural**", key="estructural", help="Preguntas sobre geología estructural", use_container_width=True):
+    if col2.button("🏗️ Estructural", key="estructural", help="Preguntas sobre geología estructural", use_container_width=True):
         st.session_state.categoria_seleccionada = "Estructural"
         st.session_state.preguntas = random.sample(preguntas_por_categoria["Estructural"], len(preguntas_por_categoria["Estructural"]))
-    if col3.button("⛏️ **Sedimentología**", key="sedimentologia", help="Preguntas sobre sedimentología", use_container_width=True):
+    if col3.button("⛏️ Sedimentología", key="sedimentologia", help="Preguntas sobre sedimentología", use_container_width=True):
         st.session_state.categoria_seleccionada = "Sedimentología"
         st.session_state.preguntas = random.sample(preguntas_por_categoria["Sedimentología"], len(preguntas_por_categoria["Sedimentología"]))
 
@@ -83,22 +107,8 @@ if st.session_state.categoria_seleccionada:
             st.session_state.indice_pregunta += 1
             st.session_state.respuesta_mostrada = False
             st.rerun()
-    
     else:
         st.subheader(f"🎉 ¡Juego terminado, {st.session_state.nombre_jugador}! Tu puntaje final es {st.session_state.puntaje}/{len(st.session_state.preguntas)}")
         st.session_state.historial_puntajes[st.session_state.nombre_jugador] = st.session_state.puntaje
-
-        # Mostrar ranking de los mejores 5 jugadores
-        st.subheader("🏆 Ranking de jugadores")
-        ranking = sorted(st.session_state.historial_puntajes.items(), key=lambda x: x[1], reverse=True)[:5]
-        for i, (jugador, puntaje) in enumerate(ranking, start=1):
-            st.write(f"{i}. {jugador}: {puntaje} puntos")
-
-        if st.button("🔄 Volver a jugar"):
-            st.session_state.categoria_seleccionada = ""
-            st.session_state.indice_pregunta = 0
-            st.session_state.puntaje = 0
-            st.session_state.respuesta_mostrada = False
-            st.rerun()
 
 
