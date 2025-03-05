@@ -108,4 +108,3 @@ if st.session_state.categoria_seleccionada:
         st.subheader("🎉 ¡Juego terminado!")
         for j in st.session_state.jugadores:
             st.write(f"{j['nombre']}: {j['puntaje']} puntos")
-
