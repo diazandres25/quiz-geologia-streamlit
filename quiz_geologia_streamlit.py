@@ -1,108 +1,125 @@
-import streamlit as st
+import streamlit as st 
 import random
-import csv
-import os
+import time
+import pandas as pd
 
-# Configurar la página con un diseño llamativo
-st.set_page_config(page_title="Geolimpiadas - ACGGP", page_icon="🌍", layout="wide")
+# Configurar la página con un diseño más profesional
+st.set_page_config(page_title="Quiz de Geología Estructural - ACGGP", page_icon="⛏️", layout="centered")
 
-# Archivo CSV para almacenar los puntajes
-CSV_FILE = "puntajes.csv"
+# Base de datos de preguntas
+preguntas = [
+    {"pregunta": "¿Qué es una falla en geología estructural?",
+     "opciones": [
+         "Una capa de roca que se desplaza.",
+         "Un plano de discontinuidad en el que ocurre un desplazamiento.",
+         "Una estructura que mantiene su forma original.",
+         "Un perfil de estrato que se encuentra horizontalmente."
+     ], "respuesta": 1},
 
-# Crear archivo si no existe
-if not os.path.exists(CSV_FILE):
-    with open(CSV_FILE, mode="w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow(["Nombre", "Puntaje"])
+    {"pregunta": "¿Qué valor representa el desplazamiento neto (A) en una falla?",
+     "opciones": [
+         "La medida vertical entre la corriente de agua y la falla.",
+         "El movimiento lateral de dos bloques rocosos.",
+         "La suma total del desplazamiento en todas las direcciones.",
+         "La diferencia entre el desplazamiento vertical y horizontal de la falla."
+     ], "respuesta": 2},
 
-# Estilos mejorados
-st.markdown(
-    """
-    <style>
-        .title {
-            text-align: center;
-            font-size: 50px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 20px;
-        }
-        .subtext {
-            text-align: center;
-            font-size: 20px;
-            color: #34495e;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+    {"pregunta": "En el contexto de un corte geológico, ¿qué se construye a partir de un mapa geológico?",
+     "opciones": [
+         "Un modelo tridimensional de las capas.",
+         "La proyección de un perfil de la geología subyacente.",
+         "Un esquema de elucubración de las rocas.",
+         "Un corte general que ignora las capas específicas."
+     ], "respuesta": 1}
+]
 
-st.markdown("<div class='title'>🌍 Geolimpiadas - ACGGP</div>", unsafe_allow_html=True)
-st.markdown("<div class='subtext'>Pon a prueba tus conocimientos en geología con este quiz.</div>", unsafe_allow_html=True)
+# Barajar preguntas al iniciar
+random.shuffle(preguntas)
 
-# Preguntas por categoría
-preguntas_por_categoria = {
-    "General": [
-        {"pregunta": "¿Qué es la geología?", "opciones": ["Estudio de los animales", "Estudio de la Tierra", "Estudio del clima", "Estudio del agua"], "respuesta": 1},
-        {"pregunta": "¿Cuál es la capa más externa de la Tierra?", "opciones": ["Núcleo", "Manto", "Corteza", "Litosfera"], "respuesta": 2},
-    ],
-    "Estructural": [
-        {"pregunta": "¿Qué es una falla geológica?", "opciones": ["Un volcán", "Un pliegue de roca", "Un plano de fractura con desplazamiento", "Un depósito de minerales"], "respuesta": 2},
-        {"pregunta": "¿Qué tipo de esfuerzo produce fallas inversas?", "opciones": ["Compresión", "Tensión", "Cizalla", "Flexión"], "respuesta": 0},
-    ],
-    "Sedimentología": [
-        {"pregunta": "¿Qué es una roca sedimentaria?", "opciones": ["Roca formada por enfriamiento de magma", "Roca formada por acumulación de sedimentos", "Roca metamórfica", "Roca con estructura cristalina"], "respuesta": 1},
-        {"pregunta": "¿Cuál es un ejemplo de roca sedimentaria?", "opciones": ["Granito", "Caliza", "Basalto", "Cuarzo"], "respuesta": 1},
-    ],
-}
+# Inicializar estado de respuestas
+if "puntaje" not in st.session_state:
+    st.session_state.puntaje = 0
+if "indice_pregunta" not in st.session_state:
+    st.session_state.indice_pregunta = 0
+if "nombre_jugador" not in st.session_state:
+    st.session_state.nombre_jugador = ""
+if "respuesta_mostrada" not in st.session_state:
+    st.session_state.respuesta_mostrada = False
+if "tiempo_inicio" not in st.session_state:
+    st.session_state.tiempo_inicio = None
 
-# Registro del jugador individual
-nombre = st.text_input("✍️ Ingresa tu nombre:")
-if nombre and st.button("Registrarse"):
-    with open(CSV_FILE, mode="a", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow([nombre, 0])
-    st.success(f"Jugador {nombre} registrado. Puedes comenzar el quiz.")
+# Preguntar nombre del jugador al inicio
+st.title("📡 Quiz de Geología Estructural - ACGGP")
+st.write("Pon a prueba tus conocimientos sobre geología estructural y la ACGGP.")
 
-# Seleccionar categoría
-categoria_seleccionada = st.selectbox("🔎 Selecciona una categoría de preguntas:", list(preguntas_por_categoria.keys()))
+if st.session_state.nombre_jugador == "":
+    st.session_state.nombre_jugador = st.text_input("✍️ Ingresa tu nombre para comenzar:")
 
-# Mostrar preguntas
-def iniciar_quiz(nombre):
-    preguntas = random.sample(preguntas_por_categoria[categoria_seleccionada], len(preguntas_por_categoria[categoria_seleccionada]))
-    puntaje = 0
-    for i, pregunta in enumerate(preguntas):
-        st.subheader(f"❓ Pregunta {i + 1} de {len(preguntas)}")
-        st.write(pregunta["pregunta"])
-        respuesta_usuario = st.radio("Selecciona una opción:", pregunta["opciones"], index=None)
+if st.session_state.nombre_jugador and st.session_state.indice_pregunta < len(preguntas):
+    # Obtener la pregunta actual
+    indice = st.session_state.indice_pregunta
+    pregunta_actual = preguntas[indice]
 
-        if st.button("Responder", key=f"resp_{i}"):
-            if respuesta_usuario is not None:
-                if pregunta["opciones"].index(respuesta_usuario) == pregunta["respuesta"]:
-                    st.success("✅ ¡Correcto!")
-                    puntaje += 1
-                else:
-                    st.error(f"❌ Incorrecto. La respuesta correcta era: {pregunta['opciones'][pregunta['respuesta']]}")
+    # Iniciar temporizador
+    if st.session_state.tiempo_inicio is None:
+        st.session_state.tiempo_inicio = time.time()
+    tiempo_restante = max(0, 0.10 - (time.time() - st.session_state.tiempo_inicio))
+    st.progress(tiempo_restante / 0.10)
 
-    # Guardar puntaje en CSV
-    with open(CSV_FILE, mode="r", newline="") as file:
-        reader = list(csv.reader(file))
-        for row in reader:
-            if row[0] == nombre:
-                row[1] = str(puntaje)
-                break
-    with open(CSV_FILE, mode="w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerows(reader)
+    if tiempo_restante == 0:
+        st.warning("⏳ ¡Tiempo agotado! Pasamos a la siguiente pregunta.")
+        st.session_state.indice_pregunta += 1
+        st.session_state.tiempo_inicio = None
+        st.rerun()
+
+    # Mostrar pregunta y opciones
+    st.subheader(f"🔹 Pregunta {indice + 1} de {len(preguntas)}")
+    st.write(f"❓ {pregunta_actual['pregunta']}")
+
+    respuesta_usuario = st.radio("Selecciona una opción:", pregunta_actual["opciones"], index=None)
+
+    # Botón de responder
+    if st.button("Responder") and not st.session_state.respuesta_mostrada:
+        if respuesta_usuario is not None:
+            if pregunta_actual["opciones"].index(respuesta_usuario) == pregunta_actual["respuesta"]:
+                st.success("✅ ¡Correcto!")
+                st.session_state.puntaje += 1
+            else:
+                st.error(f"❌ Incorrecto. La respuesta correcta era: {pregunta_actual['opciones'][pregunta_actual['respuesta']]}")
+            
+            st.session_state.respuesta_mostrada = True
     
-    st.subheader(f"🎉 Has terminado el quiz, {nombre}!")
-    st.write(f"Tu puntaje final: {puntaje}")
+    if st.session_state.respuesta_mostrada and st.button("Siguiente pregunta ➡️"):
+        st.session_state.indice_pregunta += 1
+        st.session_state.respuesta_mostrada = False
+        st.session_state.tiempo_inicio = None
+        st.rerun()
 
-if st.button("Comenzar Quiz") and nombre:
-    iniciar_quiz(nombre)
+# Mostrar resultado final
+elif st.session_state.indice_pregunta >= len(preguntas):
+    st.subheader(f"🎉 ¡Juego terminado, {st.session_state.nombre_jugador}! Tu puntaje final es {st.session_state.puntaje}/{len(preguntas)}")
+    
+    # Guardar puntaje en archivo CSV
+    historial_file = "historial_puntajes.csv"
+    nuevo_puntaje = pd.DataFrame([[st.session_state.nombre_jugador, st.session_state.puntaje]], columns=["Jugador", "Puntaje"])
+    
+    try:
+        historial = pd.read_csv(historial_file)
+        historial = pd.concat([historial, nuevo_puntaje], ignore_index=True)
+    except FileNotFoundError:
+        historial = nuevo_puntaje
 
-# Mostrar clasificación
-st.subheader("🏆 Clasificación Total")
-with open(CSV_FILE, mode="r", newline="") as file:
-    reader = csv.reader(file)
-    datos = list(reader)
-st.table(datos)
+    historial.to_csv(historial_file, index=False, encoding='utf-8')
+
+    # Mostrar ranking
+    st.subheader("🏆 Ranking de jugadores")
+    historial = historial.sort_values(by="Puntaje", ascending=False).head(5)
+    st.dataframe(historial)
+
+    # Botón para reiniciar el quiz
+    if st.button("🔄 Volver a jugar"):
+        st.session_state.puntaje = 0
+        st.session_state.indice_pregunta = 0
+        st.session_state.respuesta_mostrada = False
+        st.session_state.tiempo_inicio = None
+        st.rerun()
