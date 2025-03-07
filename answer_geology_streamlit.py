@@ -1,92 +1,95 @@
 import streamlit as st
 import random
-import time
+import pandas as pd
+import os
 
-# Configurar la página con un diseño más profesional
-st.set_page_config(page_title="Quiz de Geología - ACGGP", page_icon="⛏️", layout="centered")
+st.set_page_config(page_title="Geolimpiadas - ACGGP", page_icon="🌍", layout="centered")
 
-# Cargar imágenes para cada sección
-imagenes_categoria = {
-    "General": "general.jpg",
-    "Estructural": "estructural.jpg",
-    "Sedimentología": "sedimentologia.jpg"
+CSV_FILE = "puntajes.csv"
+if not os.path.exists(CSV_FILE):
+    pd.DataFrame(columns=["Nombre", "Puntaje"]).to_csv(CSV_FILE, index=False)
+
+imagenes_por_categoria = {
+    "General": "imagenes/general.jpg",
+    "Estructural": "imagenes/estructural.jpg",
+    "Sedimentología": "imagenes/sedimentologia.jpg"
 }
 
-# Base de datos de preguntas
 preguntas_por_categoria = {
     "General": [
-        {"pregunta": "¿Qué es la geología?", "opciones": ["Estudio de los animales", "Estudio de la Tierra", "Estudio del clima", "Estudio del agua"], "respuesta": 1},
-        {"pregunta": "¿Cuál es la capa más externa de la Tierra?", "opciones": ["Núcleo", "Manto", "Corteza", "Litosfera"], "respuesta": 2},
-        {"pregunta": "¿Qué tipo de roca es el granito?", "opciones": ["Ígnea", "Metamórfica", "Sedimentaria", "Volcánica"], "respuesta": 0},
-        {"pregunta": "¿Cuál es el mineral más abundante en la corteza terrestre?", "opciones": ["Feldespato", "Cuarzo", "Mica", "Olivino"], "respuesta": 0},
-        {"pregunta": "¿Cómo se llama la escala que mide la dureza de los minerales?", "opciones": ["Richter", "Mohs", "Beaufort", "Mercalli"], "respuesta": 1}
+        {"pregunta": "¿Qué es la geología?", "opciones": ["Estudio de los animales", "Estudio de la Tierra", "Estudio del clima", "Estudio del agua"], "respuesta": 1, "imagen": "imagenes/geologia.jpg"},
+        {"pregunta": "¿Cuál es la capa más externa de la Tierra?", "opciones": ["Núcleo", "Manto", "Corteza", "Litosfera"], "respuesta": 2, "imagen": "imagenes/corteza.jpg"}
     ],
     "Estructural": [
-        {"pregunta": "¿Qué es una falla geológica?", "opciones": ["Un volcán", "Un pliegue de roca", "Un plano de fractura con desplazamiento", "Un depósito de minerales"], "respuesta": 2},
-        {"pregunta": "¿Qué tipo de esfuerzo produce fallas inversas?", "opciones": ["Compresión", "Tensión", "Cizalla", "Flexión"], "respuesta": 0},
-        {"pregunta": "¿Cómo se llama la fuerza que actúa en direcciones opuestas en un plano de falla?", "opciones": ["Esfuerzo compresivo", "Esfuerzo tensional", "Esfuerzo cortante", "Esfuerzo elástico"], "respuesta": 2}
-    ],
-    "Sedimentología": [
-        {"pregunta": "¿Qué es una roca sedimentaria?", "opciones": ["Roca formada por enfriamiento de magma", "Roca formada por acumulación de sedimentos", "Roca metamórfica", "Roca con estructura cristalina"], "respuesta": 1},
-        {"pregunta": "¿Cuál es un ejemplo de roca sedimentaria?", "opciones": ["Granito", "Caliza", "Basalto", "Cuarzo"], "respuesta": 1},
-        {"pregunta": "¿Qué proceso transforma sedimentos en roca sedimentaria?", "opciones": ["Erosión", "Compactación y cementación", "Fusión", "Metamorfismo"], "respuesta": 1}
+        {"pregunta": "¿Qué es una falla geológica?", "opciones": ["Un volcán", "Un pliegue de roca", "Un plano de fractura con desplazamiento", "Un depósito de minerales"], "respuesta": 2, "imagen": "imagenes/falla.jpg"}
     ]
 }
 
-# Estado inicial
-if "nombre_jugador" not in st.session_state:
-    st.session_state.nombre_jugador = ""
-if "categoria_seleccionada" not in st.session_state:
-    st.session_state.categoria_seleccionada = ""
+st.markdown("<div class='title'>🌍 Geolimpiadas - ACGGP</div>", unsafe_allow_html=True)
+
+if "nombre" not in st.session_state:
+    st.session_state.nombre = ""
+if "categoria" not in st.session_state:
+    st.session_state.categoria = ""
+if "preguntas" not in st.session_state:
+    st.session_state.preguntas = []
 if "indice_pregunta" not in st.session_state:
     st.session_state.indice_pregunta = 0
 if "puntaje" not in st.session_state:
     st.session_state.puntaje = 0
-if "preguntas" not in st.session_state:
-    st.session_state.preguntas = []
+if "respuesta_mostrada" not in st.session_state:
+    st.session_state.respuesta_mostrada = False
 
-# Pantalla de inicio
-st.title("📡 Quiz de Geología - ACGGP")
-if st.session_state.nombre_jugador == "":
-    st.session_state.nombre_jugador = st.text_input("✍️ Ingresa tu nombre para comenzar:")
+if st.session_state.nombre == "":
+    st.session_state.nombre = st.text_input("✍️ Ingresa tu nombre para comenzar:")
+    if st.session_state.nombre:
+        st.rerun()
 
-# Selección de categoría
-if st.session_state.nombre_jugador and st.session_state.categoria_seleccionada == "":
-    st.subheader("Selecciona una categoría")
+elif st.session_state.categoria == "":
+    st.subheader("📌 Selecciona una categoría:")
     for categoria in preguntas_por_categoria.keys():
-        if st.button(categoria):
-            st.session_state.categoria_seleccionada = categoria
-            st.session_state.preguntas = random.sample(preguntas_por_categoria[categoria], 5)
+        if st.button(categoria, key=categoria):
+            st.session_state.categoria = categoria
+            st.session_state.preguntas = random.sample(preguntas_por_categoria[categoria], min(10, len(preguntas_por_categoria[categoria])))
             st.session_state.indice_pregunta = 0
             st.session_state.puntaje = 0
+            st.session_state.respuesta_mostrada = False
             st.rerun()
 
-# Mostrar preguntas
-if st.session_state.categoria_seleccionada:
-    categoria = st.session_state.categoria_seleccionada
-    if imagenes_categoria[categoria]:
-        st.image(imagenes_categoria[categoria], width=500)
+elif st.session_state.indice_pregunta < len(st.session_state.preguntas):
+    pregunta_actual = st.session_state.preguntas[st.session_state.indice_pregunta]
+    st.subheader(f"❓ Pregunta {st.session_state.indice_pregunta + 1}")
     
-    if st.session_state.indice_pregunta < len(st.session_state.preguntas):
-        pregunta_actual = st.session_state.preguntas[st.session_state.indice_pregunta]
-        st.subheader(f"Pregunta {st.session_state.indice_pregunta + 1} de 5")
-        st.write(f"❓ {pregunta_actual['pregunta']}")
-        respuesta_usuario = st.radio("Selecciona una opción:", pregunta_actual["opciones"], index=None)
-        
-        if st.button("Responder"):
-            if respuesta_usuario is not None:
-                if pregunta_actual["opciones"].index(respuesta_usuario) == pregunta_actual["respuesta"]:
-                    st.success("✅ ¡Correcto!")
-                    st.session_state.puntaje += 1
-                else:
-                    st.error(f"❌ Incorrecto. La respuesta correcta era: {pregunta_actual['opciones'][pregunta_actual['respuesta']]}")
-                
-                if st.button("Siguiente pregunta ➡️"):
-                    st.session_state.indice_pregunta += 1
-                    st.rerun()
-    else:
-        st.subheader(f"🎉 ¡Juego terminado, {st.session_state.nombre_jugador}! Tu puntaje final es {st.session_state.puntaje}/5")
-        if st.button("🔄 Volver a jugar"):
-            st.session_state.categoria_seleccionada = ""
-            st.session_state.nombre_jugador = ""
-            st.rerun()
+    if "imagen" in pregunta_actual:
+        st.image(pregunta_actual["imagen"], use_column_width=True)
+
+    st.write(pregunta_actual["pregunta"])
+    respuesta_usuario = st.radio("Selecciona una opción:", pregunta_actual["opciones"], index=None, key=f"pregunta_{st.session_state.indice_pregunta}")
+    
+    if st.button("Responder") and not st.session_state.respuesta_mostrada:
+        if respuesta_usuario is not None:
+            if pregunta_actual["opciones"].index(respuesta_usuario) == pregunta_actual["respuesta"]:
+                st.success("✅ ¡Correcto!")
+                st.session_state.puntaje += 1
+            else:
+                st.error(f"❌ Incorrecto. La respuesta correcta era: {pregunta_actual['opciones'][pregunta_actual['respuesta']]}")
+
+            st.session_state.respuesta_mostrada = True
+
+    if st.session_state.respuesta_mostrada and st.button("Siguiente pregunta ➡️"):
+        st.session_state.indice_pregunta += 1
+        st.session_state.respuesta_mostrada = False
+        st.rerun()
+
+else:
+    st.subheader(f"🎉 ¡Juego terminado, {st.session_state.nombre}!")
+    st.write(f"Tu puntaje final: {st.session_state.puntaje}/5")
+
+    df = pd.read_csv(CSV_FILE)
+    df = pd.concat([df, pd.DataFrame([[st.session_state.nombre, st.session_state.puntaje]], columns=["Nombre", "Puntaje"])], ignore_index=True)
+    df.to_csv(CSV_FILE, index=False)
+    
+    if st.button("🔄 Volver a jugar"):
+        for key in ["nombre", "categoria", "preguntas", "indice_pregunta", "puntaje", "respuesta_mostrada"]:
+            st.session_state[key] = "" if key in ["nombre", "categoria"] else 0
+        st.rerun()
