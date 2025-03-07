@@ -32,16 +32,41 @@ preguntas_por_categoria = {
     "General": [
         {"pregunta": "¿Qué es la geología?", "opciones": ["Estudio de los animales", "Estudio de la Tierra", "Estudio del clima", "Estudio del agua"], "respuesta": 1},
         {"pregunta": "¿Cuál es la capa más externa de la Tierra?", "opciones": ["Núcleo", "Manto", "Corteza", "Litosfera"], "respuesta": 2},
+        {"pregunta": "¿Qué tipo de roca es el granito?", "opciones": ["Ígnea", "Metamórfica", "Sedimentaria", "Volcánica"], "respuesta": 0},
+        {"pregunta": "¿Cuál es el mineral más abundante en la corteza terrestre?", "opciones": ["Feldespato", "Cuarzo", "Mica", "Olivino"], "respuesta": 0},
+        {"pregunta": "¿Cómo se llama la escala que mide la dureza de los minerales?", "opciones": ["Richter", "Mohs", "Beaufort", "Mercalli"], "respuesta": 1},
+        {"pregunta": "¿Cuál es el proceso de transformación de rocas por calor y presión?", "opciones": ["Erosión", "Compactación", "Metamorfismo", "Fusión"], "respuesta": 2},
+        {"pregunta": "¿Qué gas es el más abundante en la atmósfera terrestre?", "opciones": ["Oxígeno", "Nitrógeno", "Dióxido de carbono", "Argón"], "respuesta": 1},
+        {"pregunta": "¿Qué tipo de roca se forma por el enfriamiento del magma?", "opciones": ["Ígnea", "Sedimentaria", "Metamórfica", "Carbonatada"], "respuesta": 0},
+        {"pregunta": "¿Cuál es el agente principal de la erosión?", "opciones": ["Agua", "Viento", "Glaciares", "Seres vivos"], "respuesta": 0},
+        {"pregunta": "¿Cómo se llama la capa más interna de la Tierra?", "opciones": ["Núcleo", "Manto", "Corteza", "Litosfera"], "respuesta": 0}
     ],
     "Estructural": [
         {"pregunta": "¿Qué es una falla geológica?", "opciones": ["Un volcán", "Un pliegue de roca", "Un plano de fractura con desplazamiento", "Un depósito de minerales"], "respuesta": 2},
         {"pregunta": "¿Qué tipo de esfuerzo produce fallas inversas?", "opciones": ["Compresión", "Tensión", "Cizalla", "Flexión"], "respuesta": 0},
+        {"pregunta": "¿Cómo se llama la fuerza que actúa en direcciones opuestas en un plano de falla?", "opciones": ["Esfuerzo compresivo", "Esfuerzo tensional", "Esfuerzo cortante", "Esfuerzo elástico"], "respuesta": 2},
+        {"pregunta": "¿Qué estructura geológica forma un pliegue anticlinorio?", "opciones": ["Las capas más jóvenes en el centro", "Las capas más antiguas en el centro", "Rocas intrusivas", "Zonas de subducción"], "respuesta": 1},
+        {"pregunta": "¿Qué instrumento se usa para medir la dirección de una falla?", "opciones": ["Brújula geológica", "Sismógrafo", "GPS", "Dinamómetro"], "respuesta": 0},
+        {"pregunta": "¿Cómo se llama el punto de inicio de un terremoto?", "opciones": ["Epicentro", "Hipocentro", "Foco sísmico", "Placa tectónica"], "respuesta": 1},
+        {"pregunta": "¿Qué es una discordancia angular?", "opciones": ["Un pliegue abierto", "Un límite entre rocas de diferentes edades con inclinaciones distintas", "Una falla de tipo normal", "Un depósito de sedimentos en el océano"], "respuesta": 1},
+        {"pregunta": "¿Qué tipo de pliegue tiene un eje inclinado?", "opciones": ["Anticlinal", "Sinclinal", "Inclinados", "Recumbentes"], "respuesta": 2},
+        {"pregunta": "¿Qué tipo de falla produce un desplazamiento horizontal?", "opciones": ["Inversa", "Normal", "De desgarre", "Plana"], "respuesta": 2},
+        {"pregunta": "¿Qué ocurre en una zona de subducción?", "opciones": ["Una placa oceánica se hunde bajo otra", "Dos placas chocan y forman montañas", "Las placas se deslizan lateralmente", "Se forma una nueva corteza oceánica"], "respuesta": 0}
     ],
     "Sedimentología": [
         {"pregunta": "¿Qué es una roca sedimentaria?", "opciones": ["Roca formada por enfriamiento de magma", "Roca formada por acumulación de sedimentos", "Roca metamórfica", "Roca con estructura cristalina"], "respuesta": 1},
         {"pregunta": "¿Cuál es un ejemplo de roca sedimentaria?", "opciones": ["Granito", "Caliza", "Basalto", "Cuarzo"], "respuesta": 1},
-    ],
+        {"pregunta": "¿Qué proceso transforma sedimentos en roca sedimentaria?", "opciones": ["Erosión", "Compactación y cementación", "Fusión", "Metamorfismo"], "respuesta": 1},
+        {"pregunta": "¿Qué tipo de roca sedimentaria se forma por precipitación química?", "opciones": ["Caliza", "Arenisca", "Conglomerado", "Pizarra"], "respuesta": 0},
+        {"pregunta": "¿Qué agente transporta sedimentos en ríos?", "opciones": ["Gravedad", "Viento", "Hielo", "Agua"], "respuesta": 3},
+        {"pregunta": "¿Cuál es la principal característica de los estratos sedimentarios?", "opciones": ["Color", "Fósiles", "Capas horizontales", "Tamaño de grano"], "respuesta": 2},
+        {"pregunta": "¿Qué es una turbidita?", "opciones": ["Depósito de origen volcánico", "Sedimentos transportados por corrientes de turbidez", "Roca ígnea", "Fósil marino"], "respuesta": 1},
+        {"pregunta": "¿Qué determina el tamaño del grano en una roca sedimentaria?", "opciones": ["Tipo de mineral", "Energía del medio de transporte", "Presión tectónica", "Profundidad de formación"], "respuesta": 1},
+        {"pregunta": "¿Qué roca sedimentaria es rica en carbono?", "opciones": ["Arenisca", "Lutita", "Carbón", "Pizarra"], "respuesta": 2},
+        {"pregunta": "¿Cuál es el principal agente formador de dunas?", "opciones": ["Agua", "Hielo", "Viento", "Gravedad"], "respuesta": 2}
+    ]
 }
+
 
 # Estado de la aplicación
 if "nombre" not in st.session_state:
